@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Splitora - Smart Expense Splitting</title>
+ <script src="upi.js"></script>
+ <style>
+  * {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+  }
+
+  :root {
+   /* Primary Color - Vibrant Teal */
+   --primary: #00d9ff;
+   /* Secondary - Purple Accent */
+   --secondary: #7c3aed;
+   /* Tertiary - Coral */
+   --accent: #ff6b6b;
+   /* Neutral Dark */
+   --dark: #0f172a;
+   /* Neutral Light */
+   --light: #f8fafc;
+   /* Border/Divider */
+   --border: #e2e8f0;
+   /* Success */
+   --success: #10b981;
+   /* Warning */
+   --warning: #f59e0b;
+  }
+
+  body {
+   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+   background: var(--light);
+   color: var(--dark);
+   line-height: 1.6;
+  }
+
+  /* Header & Navigation */
+  header {
+   background: white;
+   border-bottom: 1px solid var(--border);
+   padding: 1rem 2rem;
+   position: sticky;
+   top: 0;
+   z-index: 100;
+  }
+
+  nav {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   max-width: 1200px;
+   margin: 0 auto;
+  }
+
+  .logo {
+   font-size: 1.5rem;
+   font-weight: 800;
+   background: linear-gradient(135deg, var(--primary), var(--secondary));
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+  }
+
+  .nav-links {
+   display: flex;
+   gap: 2rem;
+   list-style: none;
+   align-items: center;
+  }
+
+  .nav-links a {
+   text-decoration: none;
+   color: var(--dark);
+   font-weight: 500;
+   transition: color 0.3s ease;
+  }
+
+  .nav-links a:hover {
+   color: var(--primary);
+  }
+
+  .btn-primary {
+   background: var(--primary);
+   color: var(--dark);
+   padding: 0.75rem 1.5rem;
+   border-radius: 50px;
+   border: none;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+  }
+
+  .btn-secondary {
+   background: transparent;
+   color: var(--primary);
+   padding: 0.75rem 1.5rem;
+   border: 2px solid var(--primary);
+   border-radius: 50px;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+   background: var(--primary);
+   color: var(--dark);
+  }
+
+  /* Hero Section */
+  .hero {
+   background: linear-gradient(135deg, #00d9ff 0%, #7c3aed 100%);
+   color: white;
+   padding: 6rem 2rem;
+   text-align: center;
+   position: relative;
+   overflow: hidden;
+  }
+
+  .hero::before {
+   content: '';
+   position: absolute;
+   width: 400px;
+   height: 400px;
+   background: rgba(255, 255, 255, 0.1);
+   border-radius: 50%;
+   top: -100px;
+   right: -100px;
+  }
+
+  .hero::after {
+   content: '';
+   position: absolute;
+   width: 300px;
+   height: 300px;
+   background: rgba(255, 255, 255, 0.08);
+   border-radius: 50%;
+   bottom: -50px;
+   left: -50px;
+  }
+
+  .hero-content {
+   max-width: 800px;
+   margin: 0 auto;
+   position: relative;
+   z-index: 1;
+  }
+
+  .hero h1 {
+   font-size: 3.5rem;
+   margin-bottom: 1rem;
+   font-weight: 800;
+   line-height: 1.2;
+  }
+
+  .hero p {
+   font-size: 1.25rem;
+   margin-bottom: 2rem;
+   opacity: 0.95;
+  }
+
+  .hero-buttons {
+   display: flex;
+   gap: 1rem;
+   justify-content: center;
+   flex-wrap: wrap;
+  }
+
+  .btn-light {
+   background: white;
+   color: var(--primary);
+   padding: 0.75rem 2rem;
+   border-radius: 50px;
+   border: none;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.3s ease;
+  }
+
+  .btn-light:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Features Grid */
+  .features-section {
+   padding: 4rem 2rem;
+   max-width: 1200px;
+   margin: 0 auto;
+  }
+
+  .section-header {
+   text-align: center;
+   margin-bottom: 3rem;
+  }
+
+  .section-header h2 {
+   font-size: 2.5rem;
+   margin-bottom: 0.5rem;
+  }
+
+  .section-header p {
+   font-size: 1.1rem;
+   color: #64748b;
+  }
+
+  .features-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+   gap: 2rem;
+   margin-bottom: 4rem;
+  }
+
+  .feature-card {
+   background: white;
+   padding: 2rem;
+   border-radius: 12px;
+   border: 1px solid var(--border);
+   transition: all 0.3s ease;
+  }
+
+  .feature-card:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+   border-color: var(--primary);
+  }
+
+  .feature-icon {
+   font-size: 2.5rem;
+   margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+   margin-bottom: 0.5rem;
+   color: var(--dark);
+  }
+
+  .feature-card p {
+   color: #64748b;
+   font-size: 0.95rem;
+  }
+
+  /* Stats Section */
+  .stats-section {
+   background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+   color: white;
+   padding: 4rem 2rem;
+  }
+
+  .stats-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   gap: 2rem;
+   max-width: 1000px;
+   margin: 0 auto;
+  }
+
+  .stat-card {
+   text-align: center;
+  }
+
+  .stat-number {
+   font-size: 2.5rem;
+   font-weight: 800;
+   color: var(--primary);
+   margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+   color: #cbd5e1;
+   font-size: 0.95rem;
+  }
+
+  /* Dashboard Preview */
+  .dashboard-section {
+   padding: 4rem 2rem;
+   max-width: 1200px;
+   margin: 0 auto;
+  }
+
+  .dashboard-container {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 3rem;
+   align-items: center;
+  }
+
+  .dashboard-content h3 {
+   font-size: 2rem;
+   margin-bottom: 1rem;
+   background: linear-gradient(135deg, var(--primary), var(--secondary));
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   background-clip: text;
+  }
+
+  .dashboard-content p {
+   color: #64748b;
+   margin-bottom: 1.5rem;
+   line-height: 1.8;
+  }
+
+  .dashboard-preview {
+   background: white;
+   border: 1px solid var(--border);
+   border-radius: 12px;
+   overflow: hidden;
+   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .dashboard-header {
+   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+   color: white;
+   padding: 1.5rem;
+   font-weight: 600;
+  }
+
+  .dashboard-item {
+   padding: 1rem 1.5rem;
+   border-bottom: 1px solid var(--border);
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+  }
+
+  .dashboard-item:last-child {
+   border-bottom: none;
+  }
+
+  .item-label {
+   font-weight: 500;
+  }
+
+  .item-value {
+   color: var(--primary);
+   font-weight: 600;
+  }
+
+  /* Game Section */
+  .game-section {
+   background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+   color: white;
+   padding: 4rem 2rem;
+   text-align: center;
+  }
+
+  .game-content {
+   max-width: 600px;
+   margin: 0 auto;
+  }
+
+  .game-content h2 {
+   font-size: 2.5rem;
+   margin-bottom: 1rem;
+  }
+
+  .game-content p {
+   font-size: 1.1rem;
+   margin-bottom: 2rem;
+   opacity: 0.95;
+  }
+
+  /* Categories */
+  .categories-section {
+   padding: 4rem 2rem;
+   max-width: 1200px;
+   margin: 0 auto;
+  }
+
+  .category-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+   gap: 1.5rem;
+  }
+
+  .category-item {
+   background: white;
+   padding: 2rem;
+   border-radius: 12px;
+   text-align: center;
+   border: 2px solid var(--border);
+   transition: all 0.3s ease;
+   cursor: pointer;
+  }
+
+  .category-item:hover {
+   border-color: var(--primary);
+   box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+  }
+
+  .category-emoji {
+   font-size: 3rem;
+   margin-bottom: 1rem;
+  }
+
+  .category-name {
+   font-weight: 600;
+   color: var(--dark);
+  }
+
+  /* Heatmap Section */
+  .heatmap-section {
+   padding: 4rem 2rem;
+   background: white;
+  }
+
+  .heatmap-container {
+   max-width: 1000px;
+   margin: 0 auto;
+  }
+
+  .heatmap-grid {
+   display: grid;
+   grid-template-columns: repeat(7, 1fr);
+   gap: 0.5rem;
+   margin-top: 2rem;
+  }
+
+  .heatmap-cell {
+   aspect-ratio: 1;
+   border-radius: 4px;
+   opacity: 0.6;
+  }
+
+  .heatmap-cell.low {
+   background: #d4d4d8;
+  }
+
+  .heatmap-cell.medium {
+   background: var(--primary);
+   opacity: 0.7;
+  }
+
+  .heatmap-cell.high {
+   background: var(--secondary);
+  }
+
+  .heatmap-cell.very-high {
+   background: var(--accent);
+  }
+
+  /* Integrations */
+  .integrations-section {
+   padding: 4rem 2rem;
+   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+
+  .integrations-container {
+   max-width: 1200px;
+   margin: 0 auto;
+  }
+
+  .integrations-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+   gap: 2rem;
+   margin-top: 2rem;
+  }
+
+  .integration-card {
+   background: white;
+   padding: 2rem;
+   border-radius: 12px;
+   text-align: center;
+   border: 1px solid var(--border);
+   transition: all 0.3s ease;
+  }
+
+  .integration-card:hover {
+   transform: scale(1.05);
+   border-color: var(--primary);
+  }
+
+  .integration-icon {
+   font-size: 3rem;
+   margin-bottom: 1rem;
+  }
+
+  /* Footer */
+  footer {
+   background: var(--dark);
+   color: white;
+   padding: 3rem 2rem;
+   text-align: center;
+  }
+
+  .footer-content {
+   max-width: 1200px;
+   margin: 0 auto;
+  }
+
+  .footer-links {
+   display: flex;
+   justify-content: center;
+   gap: 2rem;
+   margin: 1rem 0;
+   flex-wrap: wrap;
+  }
+
+  .footer-links a {
+   color: #cbd5e1;
+   text-decoration: none;
+   transition: color 0.3s ease;
+  }
+
+  .footer-links a:hover {
+   color: var(--primary);
+  }
+
+  .footer-bottom {
+   margin-top: 2rem;
+   padding-top: 2rem;
+   border-top: 1px solid #334155;
+   color: #94a3b8;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+   .hero h1 {
+    font-size: 2.5rem;
+   }
+
+   .nav-links {
+    gap: 1rem;
+    font-size: 0.9rem;
+   }
+
+   .dashboard-container {
+    grid-template-columns: 1fr;
+   }
+
+   .hero-buttons {
+    flex-direction: column;
+   }
+
+   .btn-primary,
+   .btn-secondary,
+   .btn-light {
+    width: 100%;
+   }
+
+   .features-grid {
+    grid-template-columns: 1fr;
+   }
+
+   .integrations-grid {
+    grid-template-columns: repeat(2, 1fr);
+   }
+  }
+
+  .gpay:hover{
+     color: blue;
+    }
+ </style>
+</head>
+
+<body>
+ <!-- Header -->
+ <header>
+  <nav>
+   <div class="logo">💰 Splitora</div>
+   <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#integrations">Integrations</a></li>
+    <li><button class="btn-secondary">Sign In</button></li>
+    <li><button class="btn-primary">Get Started</button></li>
+   </ul>
+  </nav>
+ </header>
+
+ <!-- Hero Section -->
+ <section class="hero">
+  <div class="hero-content">
+   <h1>Split Expenses Smarter</h1>
+   <p>Manage group expenses effortlessly with real-time settlements, budget tracking, and the thrill of payment games.
+   </p>
+   <div class="hero-buttons">
+    <button class="btn-light">Start Free</button>
+    <button class="btn-secondary" style="background: rgba(255,255,255,0.1); border-color: white; color: white;">Watch
+     Demo</button>
+   </div>
+  </div>
+ </section>
+
+ <!-- Features Section -->
+ <section class="features-section" id="features">
+  <div class="section-header">
+   <h2>Powerful Features</h2>
+   <p>Everything you need to manage group finances</p>
+  </div>
+
+  <div class="features-grid">
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Global Currency Support</h3>
+    <p>Support for 150+ currencies with real-time conversion rates for seamless international transactions.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Flexible Distribution</h3>
+    <p>Split expenses equally, by percentage, or custom amounts to suit every situation perfectly.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Smart Categorization</h3>
+    <p>Automatically categorize expenses into Food, Travel, Rent, Entertainment, and more.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Budget Alerts</h3>
+    <p>Get real-time notifications when spending approaches your set budget limits.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Budget Limits</h3>
+    <p>Set monthly or event-specific spending caps with detailed analytics and insights.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>UPI Settlement</h3>
+    <p>Seamless integration with popular UPI apps for instant money transfers and settlements.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Account Balances</h3>
+    <p>View who owes whom at a glance with detailed individual and group account statements.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Spending Heatmap</h3>
+    <p>Visualize your spending patterns with interactive transaction heatmaps and trends.</p>
+   </div>
+
+   <div class="feature-card">
+    <div class="feature-icon"></div>
+    <h3>Payment Games</h3>
+    <p>Make payments fun! Play games to determine who pays the bill - loser settles up!</p>
+   </div>
+  </div>
+ </section>
+
+ <!-- Stats Section -->
+ <section class="stats-section">
+  <div class="stats-grid">
+   <div class="stat-card">
+    <div class="stat-number">500K+</div>
+    <div class="stat-label">Active Users Worldwide</div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-number">$2.5B</div>
+    <div class="stat-label">Expenses Tracked</div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-number">150+</div>
+    <div class="stat-label">Currencies Supported</div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-number">4.8★</div>
+    <div class="stat-label">Average Rating</div>
+   </div>
+  </div>
+ </section>
+
+ <!-- Dashboard Preview -->
+ <section class="dashboard-section">
+  <div class="dashboard-container">
+   <div class="dashboard-content">
+    <h3>Real-Time Balance Tracking</h3>
+    <p>Get a complete overview of who owes what in your group. Our intelligent algorithm calculates optimal settlement
+     paths to minimize transactions.</p>
+    <p>Track expenses by category, view historical data, and make informed decisions about shared costs with detailed
+     analytics.</p>
+    <button class="btn-primary">View Dashboard →</button>
+   </div>
+   <div class="dashboard-preview">
+    <div class="dashboard-header">Group Balance Summary</div>
+    <div class="dashboard-item">
+     <span class="item-label">You are owed</span>
+     <span class="item-value">₹2,450</span>
+    </div>
+    <div class="dashboard-item">
+     <span class="item-label">You owe</span>
+     <span class="item-value">₹890</span>
+    </div>
+    <div class="dashboard-item">
+     <span class="item-label">Net Balance</span>
+     <span class="item-value" style="color: var(--success);">+₹1,560</span>
+    </div>
+    <div class="dashboard-item">
+     <span class="item-label">Group Total</span>
+     <span class="item-value">₹15,200</span>
+    </div>
+    <div class="dashboard-item">
+     <span class="item-label">Members</span>
+     <span class="item-value">4 People</span>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <!-- Categories Section -->
+ <section class="categories-section" id="categories">
+  <div class="section-header">
+   <h2>Smart Categories</h2>
+   <p>Organize and track expenses by category</p>
+  </div>
+
+  <div class="category-grid">
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Food & Dining</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Travel</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Rent & Utilities</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Entertainment</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Shopping</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Healthcare</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Education</div>
+   </div>
+   <div class="category-item">
+    <div class="category-emoji"></div>
+    <div class="category-name">Fitness</div>
+   </div>
+  </div>
+ </section>
+
+ <!-- Heatmap Section -->
+ <section class="heatmap-section">
+  <div class="heatmap-container">
+   <div class="section-header">
+    <h2>Spending Patterns Visualization</h2>
+    <p>Analyze your transaction history with an interactive heatmap</p>
+   </div>
+
+   <div class="heatmap-grid">
+    <div class="heatmap-cell low"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell very-high"></div>
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell low"></div>
+
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell low"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell low"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell very-high"></div>
+
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell very-high"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell low"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell low"></div>
+
+    <div class="heatmap-cell low"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell very-high"></div>
+    <div class="heatmap-cell high"></div>
+    <div class="heatmap-cell medium"></div>
+    <div class="heatmap-cell low"></div>
+   </div>
+   <p style="text-align: center; margin-top: 1rem; color: #64748b; font-size: 0.9rem;">
+    Darker colors indicate higher spending activity. Identify your peak spending days and adjust your budget
+    accordingly.
+   </p>
+  </div>
+ </section>
+
+ <!-- Game Section -->
+ <section class="game-section">
+  <div class="game-content">
+   <h2>Payment Games</h2>
+   <p>Make bill splitting fun! Spin the wheel, play dice games, or challenge friends with quick games to determine who
+    pays. The loser settles the bill instantly via UPI!</p>
+   <button class="btn-light">Play Now</button>
+  </div>
+ </section>
+
+ <!-- Integrations Section -->
+ <section class="integrations-section" id="integrations">
+  <div class="integrations-container">
+   <div class="section-header">
+    <h2>Seamless Integrations</h2>
+    <p>Connect with your favorite payment platforms</p>
+   </div>
+
+   <div class="integrations-grid">
+    <div class="integration-card">
+     <div class="integration-icon"></div>
+     <i class="fa-brands fa-google-pay gpay"></i>
+     <strong>Google Pay</strong>
+    </div>
+    <div class="integration-card">
+     <div class="integration-icon"></div>
+     <strong>PhonePe</strong>
+    </div>
+    <div class="integration-card">
+     <div class="integration-icon"></div>
+     <strong>PayTM</strong>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <!-- Footer -->
+ <footer>
+  <div class="footer-content">
+   <div class="logo" style="color: var(--primary); margin-bottom: 1rem;">💰 Splitora</div>
+   <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#terms">Terms</a>
+    <a href="#contact">Contact</a>
+    <a href="#blog">Blog</a>
+   </div>
+   <div class="footer-bottom">
+    <p>&copy; 2025 Splitora. Split smarter, live better.</p>
+   </div>
+  </div>
+ </footer>
+</body>
+
+</html>
